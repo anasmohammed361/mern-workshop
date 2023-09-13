@@ -2,15 +2,19 @@ import express from "express";
 import session from "express-session";
 import dotenv from "dotenv";
 import { authRouter } from "./routes/authRouter.js";
+import {noteRouter} from "./routes/noteRouter.js"
 import mongoose from "mongoose";
 import cors from "cors"
 import passport from "passport";
 import { UserModel } from "./models/User.js";
+import multer from "multer"
 import path from "path"
+
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors())
+// app.use()
 app.use(
   session({
     secret: process.env.SECRET,
@@ -39,14 +43,9 @@ passport.deserializeUser((id, done) => {
 
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.use("/auth", authRouter);
-// app.get("/", (req, res) => {
-//   if (req.isAuthenticated()) {
-//     res.send("Auth");
-//   } else {
-//     res.send("Not auth");
-//   }
-// });
+app.use("/pdf",noteRouter)
 app.get("/out", (req, res) => {
   req.logOut((err) => {
     console.log(err);
