@@ -1,4 +1,4 @@
-import {Accordion, Spinner} from "flowbite-react";
+import { Accordion, Spinner } from "flowbite-react";
 import { TableCustom } from "../components/TableCustom"
 import { ModalCustom } from "../components/ModalCustom";
 import { useEffect, useState } from "react";
@@ -8,8 +8,8 @@ import { groupByField } from "../scripts/groupElements";
 
 const Root = () => {
   const [auth, setAuth] = useState(false);
-  const [loading,setLoading] = useState(true) ;
-  const [values,setValues] = useState({})
+  const [loading, setLoading] = useState(true);
+  const [values, setValues] = useState({})
   useEffect(() => {
     fetch("/api/auth")
       .then((response) => {
@@ -21,19 +21,25 @@ const Root = () => {
         console.log(e);
         setAuth(false);
       });
-  },[]);
-  useEffect(()=>{
-  if (!auth) {
-    return
-  }
-  fetch('/pdf/all').then(value=>{
-    const tt = groupByField(value,'parent')
-    console.log(tt);
-    setValues(tt)
-  })
-  },[auth])
+  }, []);
+  useEffect(() => {
+    if (!auth) {
+      return
+    }
+    fetch('/pdf/all').then(value => {
+      value.json().then(jsonVal => {
+        const groupedValue = groupByField(jsonVal, 'parent')
+        console.log(Object.entries(groupedValue));
+        setValues(groupedValue)
+      }).catch(e => {
+        console.log(e);
+      })
+    }).catch(e => {
+      console.log(e);
+    })
+  }, [auth])
   if (loading) {
-   return <Spinner/>
+    return <Spinner />
   }
 
   if (!loading && !auth) {
@@ -41,24 +47,28 @@ const Root = () => {
   }
 
   return (
-  <main className="h-screen w-full bg-gradient-to-tr from-slate-900 to-slate-950 dark">
-   <div className="flex items-center justify-between p-4">
-    <h1 className="text-white text-5xl">All your Notes Organized in one place</h1>
-   <ModalCustom/>
-   </div>
-    <div className="px-10">
-    <Accordion >
-      <Accordion.Panel>
-        <Accordion.Title >
-          What is Flowbite?
-        </Accordion.Title>
-        <Accordion.Content>
-         <TableCustom/>
-        </Accordion.Content>
-      </Accordion.Panel>  
-    </Accordion>
-    </div>
-  </main>
+    <main className="h-screen w-full bg-gradient-to-tr from-slate-900 to-slate-950 dark">
+      <div className="flex items-center justify-between p-10">
+        <h1 className="text-white text-5xl ">All your Notes in one place</h1>
+        <ModalCustom />
+      </div>
+      <div className="px-10">
+        <Accordion >
+          {Object.entries(values).map(e => {
+            return (
+              <Accordion.Panel key={e[0]}>
+                <Accordion.Title >
+                  {e[0]}
+                </Accordion.Title>
+                <Accordion.Content>
+                  <TableCustom items={e[1]} />
+                </Accordion.Content>
+              </Accordion.Panel>
+            )
+          })}
+        </Accordion>
+      </div>
+    </main>
   )
 }
 

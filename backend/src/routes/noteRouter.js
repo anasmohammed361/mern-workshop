@@ -40,6 +40,7 @@ noteRouter.post('/',multer().single('file') ,async (req, res) => {
   })
   noteRouter.get("/all",async (req,res)=>{
     try {
+      console.log("hit");
       const allElems = await noteModel.find({}).select({fileData:0})
       return res.json(allElems)
     } catch (error) {
